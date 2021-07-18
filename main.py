@@ -1,4 +1,5 @@
 import mysql.connector
+import base64
 import getpass
 
 mydb = mysql.connector.connect(
@@ -11,14 +12,19 @@ mycursor = mydb.cursor()
 
 def login_verification():
     username = input('username : ')
-    password = getpass.getpass('password : (type password don\'t show in display)')
+    password = getpass.getpass('password : (type password don\'t show in display)').encode("utf-8")
+    passwordencoded = base64.b64encode(password)
     sql = "select * from users where username = %s and password = %s"
-    mycursor.execute(sql,[(username),(password)])
+    mycursor.execute(sql,[(username),(passwordencoded)])
     results = mycursor.fetchone()
     if results:
         print('Login Success')
-        print(results)
-        print(type(results))
+        # print(results)
+        # print(type(results))
+        print('Username : ', results[1])
+        # decoded password
+        # passx = base64.b64decode(results[2]).decode('utf-8')
+        # print('Password : ', passx)
         menu()
     else:
         print('Login fail username or password wrong')
@@ -36,10 +42,12 @@ def register():
         while(True):
             password = getpass.getpass('password : (type password don\'t show in display)')
             confirmpassword = getpass.getpass('confirm password : (type password don\'t show in display)')
+            password_utf8 = password.encode("utf-8")
+            passwordencoded = base64.b64encode(password_utf8)
             if password == confirmpassword:
                 print('password match')
                 sql = "insert into users (username, password) values (%s, %s)"
-                mycursor.execute(sql, [(username),(password)])
+                mycursor.execute(sql, [(username),(passwordencoded)])
                 mydb.commit()
                 print('Register Success')
                 # break
